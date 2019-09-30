@@ -1,0 +1,152 @@
+<!-- Author : Ayush Kumar - aykumar@cs.stonybrook.edu -->
+
+<!doctype html>
+<html>
+<head>
+    <style>
+        .bar {
+            fill: orange;
+        }
+        .dropdown-content a {
+          color: black;
+          padding: 12px 16px;
+          text-decoration: none;
+          display: block;
+        }
+        .dropdown a:hover {background-color: #ddd;}
+        #btn {
+          background-color: #3498DB;
+
+          padding: 8px;
+          font-size: 16px;
+          color: white;
+          border-left: 6px solid red;
+          border-radius: 2px;
+          cursor: pointer;
+        }
+
+
+        .dropbtn:hover, .dropbtn:focus {
+          background-color: #2980B9;
+        }
+    </style>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+<body>
+    <div class="dropdown">
+      <select class="dropSelect" id="dropSelect">
+        <option value="">country</option>
+        <option value="">year</option>
+        <option value="">sex</option>
+        <option value="">age</option>
+        <option value="">population</option>
+        <option value="">suicides_per_100k</option>
+        <option value="">country-year</option>
+        <option value="">HDI_for_year</option>
+        <option value="">gdp_for_year</option>
+        <option value="">gdp_per_capita</option>
+        <option value="">generation</option>
+
+      </select>
+      <button class="dropbtn" id="btn">Enter</button>
+    </div>
+
+<svg width="1800" height="1500"></svg>
+<script>
+
+    var svg = d3.select("svg"),
+        margin = 400,
+        width = svg.attr("width") - margin,
+        height = svg.attr("height") - margin
+        padding = 100
+    // svg.append("text")
+    //    .attr("transform", "translate(100,0)")
+    //    .attr("x", 50)
+    //    .attr("y", 50)
+    //    .attr("font-size", "24px")
+    //    .text("Stop suicideing")
+
+    var xScale = d3.scaleBand().range([0, width]).padding(0.1);//scaleBand() is used to construct a band scale. This is useful when our data has discrete bands.
+        yScale = d3.scaleLinear().range([height, 0]);//a linear scale for the y-axis since this axis will show our fixation duration.
+
+    var g = svg.append("g")
+               .attr("transform", "translate(" + 100 + "," + 100 + ")");
+
+    d3.csv("master.csv", function(error, data) {
+        //console.log(data);
+        if (error) {
+            throw error;
+        }
+        //console.log("xxxxxxxxxxxxxxxxxxxxxxxxx");
+        xScale.domain(data.map(function(d) { return d.country; })); //provide domain values to the x and y scales, here it's X Scale which is Timestamp
+        yScale.domain([0, d3.max(data, function(d) { return d.suicides; })]); // domain value of Fixation Duration to y Scale
+
+        g.append("g") //Another group element to have our x-axis grouped under one group element
+         .attr("transform", "translate(0," + height + ")") // We then use the transform attribute to shift our x-axis towards the bottom of the SVG.
+         .call(d3.axisBottom(xScale)) //We then insert x-axis on this group element using .call(d3.axisBottom(x)).
+         .append("text")
+         .attr("y", height - 250)
+         .attr("x", width - 100)
+         .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
+         .attr("transform", "translate("+ (padding/2) +","+(height/2)+")rotate(-90)")
+         .attr("text-anchor", "end")
+         .attr("stroke", "black")
+         .text("Time Stamp");
+
+         g.selectAll("text")
+        .style("text-anchor", "end")
+        .attr("dx", "-.8em")
+        .attr("dy", ".15em")
+        .attr("transform", "rotate(-65)");
+
+        g.append("g") //Another group element to have our y-axis grouped under one group element
+         .call(d3.axisLeft(yScale).tickFormat(function(d){ // Try with X Scaling too.
+             return  d;
+         })
+         .ticks(5)) //We have also specified the number of ticks we would like our y-axis to have using ticks(10).
+         .append("text")
+         .attr("transform", "rotate(-90)")
+         .attr("y", 6)
+         .attr("dy", "-5.1em")
+         .attr("text-anchor", "end")
+         .attr("stroke", "black")
+         .text("Suicides");
+
+        g.selectAll(".bar") //created dynamic bars with our data using the SVG rectangle element.
+         .data(data)
+         .enter().append("rect")
+         .attr("class", "bar")
+         .on("mouseover", onMouseOver) //On selection of bar elements, two new event handlers added, viz. mouseover and mouseout and we are calling the respective functions to handle mouse events
+         .on("mouseout", onMouseOut)
+         .attr("x", function(d) { return xScale(d.country); })  //x scale created earlier and pass the year value from our data.
+         .attr("y", function(d) { return yScale(d.suicides); }) // pass the data value to our y scale and receive the corresponding y value from the y range.
+         .attr("width", xScale.bandwidth()) //width of our bars would be determined by the scaleBand() function.
+         .attr("height", function(d) { return height - yScale(d.suicides); }); //height of the bar would be calculated as height - yScale(d.value)
+         //the height of the SVG minus the corresponding y-value of the bar from the y-scale
+
+
+
+         function onMouseOver(d, i) {
+             //d3.select(this).attr('class', 'highlight');  //selected bar (given by the 'this' object)
+             d3.select(this).style('fill', 'red');
+         }
+
+         //mouseout event handler function
+         function onMouseOut(d, i) {
+             // use the text label class to remove label on mouseout
+             d3.select(this).style('fill', 'orange');
+
+         }
+         document.getElementById("btn").addEventListener("click", function(){
+           var sel = document.getElementById("dropSelect");
+            console.log(sel);
+            console.log(sel.options[sel.selectedIndex].text);
+         });
+
+
+
+
+
+    });
+</script>
+</body>
+</html>
