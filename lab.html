@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style> /* set the CSS */
+
+.bar { fill: steelblue; }
+.bar:hover{fill: brown;}
+</style>
+<body>
+  <div class="dropdown">
+    <select class="dropSelect" id="dropSelect">
+      <option value="">country</option>
+      <option value="">year</option>
+      <option value="">sex</option>
+      <option value="">age</option>
+      <option value="">population</option>
+      <option value="">suicides_per_100k</option>
+      <option value="">country-year</option>
+      <option value="">HDI_for_year</option>
+      <option value="">gdp_for_year</option>
+      <option value="">gdp_per_capita</option>
+      <option value="">generation</option>
+
+    </select>
+    <button class="dropbtn" id="btn">Enter</button>
+  </div>
+<!-- load the d3.js library -->
+<script src="//d3js.org/d3.v4.min.js"></script>
+<script>
+
+// set the dimensions and margins of the graph
+var margin = {top: 20, right: 20, bottom: 200, left: 40},
+    width = 960 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+
+// set the ranges
+var x = d3.scaleBand()
+          .range([0, width])
+          .padding(0.1);
+var y = d3.scaleLinear()
+          .range([height, 0]);
+
+// append the svg object to the body of the page
+// append a 'group' element to 'svg'
+// moves the 'group' element to the top left margin
+var svg = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")");
+
+// get the data
+d3.csv("master.csv", function(error, data) {
+  if (error) throw error;
+
+  // format the data
+  // data.forEach(function(d) {
+  //   d.sales = +d.sales;
+  // });
+
+  // Scale the range of the data in the domains
+  x.domain(data.map(function(d) { return d.country; }));
+  y.domain([0, d3.max(data, function(d) { return d.suicides; })]);
+
+  // append the rectangles for the bar chart
+  svg.selectAll(".bar")
+      .data(data)
+    .enter().append("rect")
+      .attr("class", "bar")
+      // .on("mouseover", onMouseOver) //On selection of bar elements, two new event handlers added, viz. mouseover and mouseout and we are calling the respective functions to handle mouse events
+      // .on("mouseout", onMouseOut)
+      .attr("x", function(d) { return x(d.country); })
+      .attr("width", x.bandwidth())
+      .attr("y", function(d) { return y(d.suicides); })
+      .attr("height", function(d) { return height - y(d.suicides); });
+
+  // add the x Axis
+      svg.append("g")
+          .attr("transform", "translate(0," + height + ")")
+          .call(d3.axisBottom(x));
+//rotate x axis
+      svg.selectAll("text")
+      .style("text-anchor", "end")
+      .attr("dx", "-.8em")
+      .attr("dy", ".15em")
+      .attr("transform", "rotate(-65)");
+  // add the y Axis
+      svg.append("g")
+          .call(d3.axisLeft(y));
+
+      function onMouseOver(d, i) {
+        d3.select(this).attr('class', 'highlight');  //selected bar (given by the 'this' object)
+        d3.select(this)
+          .transition()     // adds animation
+          .duration(400)
+          //d3.select(this).style('fill', 'red');
+      }
+
+      //mouseout event handler function
+      function onMouseOut(d, i) {
+          // use the text label class to remove label on mouseout
+          d3.select(this).style('fill', 'orange');
+          d3.selectAll('.val')
+            .remove()
+      }
+      document.getElementById("btn").addEventListener("click", function(){
+        console.log("ll");
+
+        d3.selectAll("svg").remove();
+        var svg = d3.select("body").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+            .attr("transform",
+                  "translate(" + margin.left + "," + margin.top + ")");
+
+        //x.domain(data.map(function(d) { return d.generation; }));
+        var sel = document.getElementById("dropSelect");
+        var opt = sel.options[sel.selectedIndex].text;
+        console.log(opt);
+        //xScale.domain(data.map(function(d) { return opt; }));
+        if(opt == "country"){
+          console.log("country");
+          //console.log(d.country);
+           x.domain(data.map(function(d) { return d.country; }));
+        }
+        else if(opt == "year"){
+          console.log("year");
+          //console.log(d.year);
+           x.domain(data.map(function(d) { return d.year; }));
+        }
+        else if(opt == "sex"){
+          console.log("sex");
+          //console.log(d.sex);
+           x.domain(data.map(function(d) { return d.sex; }));
+        }
+        else if(opt == "age"){
+          console.log("age");
+          //console.log(d.age);
+           x.domain(data.map(function(d) { return d.age; }));
+        }
+        else if(opt == "population"){
+          console.log("population");
+          //console.log(d.population);
+           x.domain(data.map(function(d) { return d.population; }));
+        }
+        else if(opt == "suicides_per_100k"){
+          console.log("suicides_per_100k");
+          //console.log(d.suicides_per_100k);
+           x.domain(data.map(function(d) { return d.suicides_per_100k; }));
+        }
+        else if(opt == "country_year"){
+          console.log("country_year");
+          //console.log(d.country_year);
+          x.domain(data.map(function(d) { return d.country_year; }));
+        }
+        else if(opt == "HDI_for_year"){
+          console.log("HDI_for_year");
+          //console.log(d.HDI_for_year);
+          x.domain(data.map(function(d) { return d.HDI_for_year; }));
+        }
+        else if(opt == "gdp_for_year"){
+          console.log("gdp_for_year");
+          //console.log(d.gdp_for_year);
+           x.domain(data.map(function(d) { return d.gdp_for_year; }));
+        }
+        else if(opt == "gdp_per_capita"){
+          console.log("gdp_per_capita");
+          //console.log(d.gdp_per_capita);
+          x.domain(data.map(function(d) { return d.gdp_per_capita; }));
+        }
+        else if(opt == "generation"){
+          console.log("generation");
+        //  console.log(d.generation);
+          x.domain(data.map(function(d) { return d.generation; }));
+        }
+        x.domain(data.map(function(d) { return d.generation; }));
+        y.domain([0, d3.max(data, function(d) { return d.suicides; })]);
+
+        // append the rectangles for the bar chart
+        svg.selectAll(".bar")
+            .data(data)
+          .enter().append("rect")
+            .attr("class", "bar")
+            // .on("mouseover", onMouseOver) //On selection of bar elements, two new event handlers added, viz. mouseover and mouseout and we are calling the respective functions to handle mouse events
+            // .on("mouseout", onMouseOut)
+            //.attr("x", function(d) { return x(d.generation); })
+            .attr("x", function(d) {
+              //console.log(d);
+              if(opt == "country"){
+                console.log("country");
+                //console.log(d.country);
+                 return x(d.country);
+              }
+              else if(opt == "year"){
+                console.log("year");
+                //console.log(d.year);
+                 return x(d.year);
+              }
+              else if(opt == "sex"){
+                console.log("sex");
+                //console.log(d.sex);
+                 return x(d.sex);
+              }
+              else if(opt == "age"){
+                console.log("age");
+                //console.log(d.age);
+                 return x(d.age);
+              }
+              else if(opt == "population"){
+                console.log("population");
+                //console.log(d.population);
+                 return x(d.population);
+              }
+              else if(opt == "suicides_per_100k"){
+                console.log("suicides_per_100k");
+                //console.log(d.suicides_per_100k);
+                 return x(d.suicides_per_100k);
+              }
+              else if(opt == "country_year"){
+                console.log("country_year");
+                //console.log(d.country_year);
+                 return x(d.country_year);
+              }
+              else if(opt == "HDI_for_year"){
+                console.log("HDI_for_year");
+                //console.log(d.HDI_for_year);
+                 return x(d.HDI_for_year);
+              }
+              else if(opt == "gdp_for_year"){
+                console.log("gdp_for_year");
+                //console.log(d.gdp_for_year);
+                 return x(d.gdp_for_year);
+              }
+              else if(opt == "gdp_per_capita"){
+                console.log("gdp_per_capita");
+                //console.log(d.gdp_per_capita);
+                 return x(d.gdp_per_capita);
+              }
+              else if(opt == "generation"){
+                console.log("generation");
+                //console.log(d.generation);
+                 return x(d.generation);
+              }
+
+            })  //x scale created earlier and pass the year value from our data.
+            .attr("width", x.bandwidth())
+            .attr("y", function(d) { return y(d.suicides); })
+            .attr("height", function(d) { return height - y(d.suicides); });
+
+        // add the x Axis
+            svg.append("g")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(x));
+      //rotate x axis
+            svg.selectAll("text")
+            .style("text-anchor", "end")
+            .attr("dx", "-.8em")
+            .attr("dy", ".15em")
+            .attr("transform", "rotate(-65)");
+        // add the y Axis
+            svg.append("g")
+                .call(d3.axisLeft(y));
+
+      });
+
+});
+
+</script>
+</body>
