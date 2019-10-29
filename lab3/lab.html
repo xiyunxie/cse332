@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style> /* set the CSS */
+
+.bar { fill: steelblue; }
+.bar:hover{fill: brown;}
+</style>
+<body>
+  <div class="dropdown">
+    <select class="dropSelect" onchange="change(1)" id="dropSelect">
+
+      <option value="">year</option>
+      <option value="">country</option>
+      <option value="">suicides</option>
+      <option value="">sex</option>
+      <option value="">age</option>
+      <option value="">population</option>
+      <option value="">suicides_per_100k</option>
+      <option value="">HDI_for_year</option>
+      <option value="">gdp_for_year</option>
+      <option value="">gdp_per_capita</option>
+      <option value="">generation</option>
+
+    </select>
+    <p>x</p>
+    <select class="dropSelect" onchange="change(2)" id="dropSelect2">
+      <option value="">suicides</option>
+      <option value="">year</option>
+      <option value="">country</option>
+      <option value="">sex</option>
+      <option value="">age</option>
+      <option value="">population</option>
+      <option value="">suicides_per_100k</option>
+      <option value="">HDI_for_year</option>
+      <option value="">gdp_for_year</option>
+      <option value="">gdp_per_capita</option>
+      <option value="">generation</option>
+
+    </select>
+    <p>y<p>
+    <!-- <button class="dropbtn" id="btn">Enter</button> -->
+  </div>
+<!-- load the d3.js library -->
+<script src="//d3js.org/d3.v4.min.js"></script>
+<script>
+// set the dimensions and margins of the graph
+var margin = {top: 20, right: 20, bottom: 30, left: 50},
+    width = 1960 - margin.left - margin.right,
+    height = 900 - margin.top - margin.bottom;
+
+// // parse the date / time
+// var parseTime = d3.timeParse("%d-%b-%y");
+
+// set the ranges
+//var x = d3.scaleTime().range([0, width]);
+var x = d3.scaleLinear().range([0, width])
+
+var y = d3.scaleLinear().range([height, 0]);
+
+// define the line
+// var valueline = d3.line()
+//     .x(function(d) { return x(d.date); })
+//     .y(function(d) { return y(d.close); });
+
+// append the svg obgect to the body of the page
+// appends a 'group' element to 'svg'
+// moves the 'group' element to the top left margin
+var svg = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")");
+
+// Get the data
+var lastx="suicides";
+var lasty="year";
+function change(i){
+  //console.log(i);
+  var e = document.getElementById("dropSelect");
+  var e2 = document.getElementById("dropSelect2");
+  var t1 = e.options[e.selectedIndex].text;
+  var t2 = e2.options[e2.selectedIndex].text;
+  if(t1 == t2){
+    //console.log("eq");
+    window.alert("Fail: Two attributes are the same");
+  }
+  else{
+
+    d3.selectAll("svg").remove();
+    var margin = {top: 20, right: 20, bottom: 30, left: 50},
+        width = 1960 - margin.left - margin.right,
+        height = 900 - margin.top - margin.bottom;
+
+    var x = d3.scaleLinear().range([0, width])
+
+    var y = d3.scaleLinear().range([height, 0]);
+    d3.csv("master3.csv", function(error, data) {
+        if (error) throw error;
+        if(i==1){//xaxis
+          if(t1 == year){
+            x.domain([d3.min(data, function(d) { return d.year; })-1, d3.max(data, function(d) { return d.year; })]);
+          }
+          else if(t1 == country){
+
+          }
+          else if(t1 == suicides){
+            x.domain([0,14000]);
+          }
+          else if(t1 == sex){
+            x.domain(["male","female"]);
+          }
+          else if(t1 == age){
+            x.domain(data.map(function(d) { return d.age; }));
+          }
+          else if(t1 == population){
+            x.domain([1000000,1400000]);
+          }
+          else if(t1 == suicides_per_100k){
+
+          }
+          else if(t1 == HDI_for_year){
+
+          }
+          else if(t1 == gdp_for_year){
+
+          }
+          else if(t1 == gdp_per_capita){
+
+          }
+          else if(t1 == generation){
+            x.domain(data.map(function(d) { return d.genaration; }));
+          }
+        }
+        // Scale the range of the data
+        x.domain([d3.min(data, function(d) { return d.year; })-1, d3.max(data, function(d) { return d.year; })]);
+        //x.domain(d3.extent(data, function(d) { return d.year; }));
+        //y.domain([0, d3.max(data, function(d) { return d.suicides; })]);
+        y.domain([0,14000]);
+
+        // Add the scatterplot
+        svg.selectAll("dot")
+            .data(data)
+          .enter().append("circle")
+            .attr("r", 1)
+            .attr("cx", function(d) { return x(d.year); })
+            .attr("cy", function(d) { return y(d.suicides); });
+
+        // Add the X Axis
+        svg.append("g")
+            .attr("class","xaxis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.axisBottom(x));
+
+        // Add the Y Axis
+        svg.append("g")
+            .attr("class","yaxis")
+            .call(d3.axisLeft(y));
+
+      });
+  }
+
+}
+d3.csv("master3.csv", function(error, data) {
+  if (error) throw error;
+
+  // Scale the range of the data
+  x.domain([d3.min(data, function(d) { return d.year; })-1, d3.max(data, function(d) { return d.year; })]);
+  //x.domain(d3.extent(data, function(d) { return d.year; }));
+  //y.domain([0, d3.max(data, function(d) { return d.suicides; })]);
+  y.domain([0,14000]);
+
+  // Add the scatterplot
+  svg.selectAll("dot")
+      .data(data)
+    .enter().append("circle")
+      .attr("r", 1)
+      .attr("cx", function(d) { return x(d.year); })
+      .attr("cy", function(d) { return y(d.suicides); });
+
+  // Add the X Axis
+  svg.append("g")
+      .attr("class","xaxis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x));
+
+  // Add the Y Axis
+  svg.append("g")
+      .attr("class","yaxis")
+      .call(d3.axisLeft(y));
+//document.getElementById(dropSelect)
+    // d3.select('.dropSelect')
+    // .on('change', function() {
+    //   console.log(eval(d3.select(this).property('value')));
+    //   //var newData = eval(d3.select(this).property('value'));
+    //   //updateLegend(newData);
+    // });
+    // d3.select('.dropSelect2')
+    // .on('change', function() {
+    //   console.log(eval(d3.select(this).property('value')));
+    //   //var newData = eval(d3.select(this).property('value'));
+    //   //updateLegend(newData);
+    // });
+});
+
+</script>
+</body>
